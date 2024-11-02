@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 p-8 shadow-md mt-8">
+    <footer className="bg-gray-800 p-8 shadow-md">
       <div className="container mx-auto text-center">
-        <ul className="flex flex-wrap justify-center space-x-4 mb-4 py-4">
+        <ul className="flex flex-col space-y-4 md:flex-row md:flex-wrap md:space-y-0 justify-center md:space-x-4 mb-4 py-4">
           <li>
             <Link
               to="/posts/categories/Agriculture"
