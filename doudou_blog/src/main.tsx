@@ -17,10 +17,17 @@ import Dashboard from "./pages/Dashboard.tsx";
 import EditPost from "./pages/EditPost.tsx";
 import Logout from "./pages/Logout.tsx";
 
+import store from "./store/index.ts";
+import { Provider } from "react-redux";
+
 const BrowserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <Provider store={store}>
+        <Layout />
+      </Provider>
+    ),
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },

@@ -4,6 +4,8 @@ import { AiOutlineClose } from "react-icons/ai";
 import { FaBars } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { throttle } from "lodash";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 const Header = () => {
   const [isMdScreen, setIsMdScreen] = useState(() => {
@@ -24,6 +26,9 @@ const Header = () => {
 
   // 使用 lodash 的 throttle 函数
   const throttledHandleResize = throttle(handleResize, 100);
+
+  // 使用 useSelector 钩子访问 Redux 中的用户状态
+  const user = useSelector((state: RootState) => state.user.user);
 
   // 添加和移除窗口 resize 事件监听器
   useEffect(() => {
@@ -47,7 +52,7 @@ const Header = () => {
               Doudou's Blog
             </span>
           </Link>
-          {(isMdScreen || isDropdown) && (
+          {user?.userId && (isMdScreen || isDropdown) && (
             <div className="link_container fixed top-16 right-0 bg-white rounded-lg md:static">
               <ul className="flex flex-col p-2 text-center space-y-2 md:flex-row md:p-0 md:space-x-4 md:space-y-0 ">
                 <li>
@@ -84,6 +89,30 @@ const Header = () => {
                     className="bg-orange-100 rounded-lg p-2 w-full inline-block text-black hover:text-orange-600"
                   >
                     Logout
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
+          {!user?.userId && (isMdScreen || isDropdown) && (
+            <div className="link_container fixed top-16 right-0 bg-white rounded-lg md:static">
+              <ul className="flex flex-col p-2 text-center space-y-2 md:flex-row md:p-0 md:space-x-4 md:space-y-0 ">
+                <li>
+                  <Link
+                    to="/authors"
+                    onClick={() => setIsDropdown(false)}
+                    className="bg-orange-100 rounded-lg p-2 w-full inline-block text-black hover:text-orange-600"
+                  >
+                    Authors
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsDropdown(false)}
+                    className="bg-orange-100 rounded-lg p-2 w-full inline-block text-black hover:text-orange-600"
+                  >
+                    Login
                   </Link>
                 </li>
               </ul>

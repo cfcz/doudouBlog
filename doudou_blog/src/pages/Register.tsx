@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUser } from "../store/userSlice";
 
 const Register = () => {
   const [userData, setUserData] = useState({
     username: "",
     email: "",
     password: "",
-    confirmPassword: "",
+    password2: "",
   });
-  const [error] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const changeInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -18,9 +23,31 @@ const Register = () => {
     }));
   };
 
-  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Handle form submission
+    console.log(userData);
+    setError("");
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        userData
+      );
+      const newUser = await response.data;
+      console.log(newUser);
+      if (!newUser) {
+        setError("could not register user");
+        return;
+      }
+      dispatch(setUser(newUser));
+      navigate("/");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.error);
+      } else {
+        setError(String(error));
+      }
+    }
   };
 
   return (
@@ -60,8 +87,8 @@ const Register = () => {
           <input
             type="password"
             placeholder="Confirm Password"
-            name="confirmPassword"
-            value={userData.confirmPassword}
+            name="password2"
+            value={userData.password2}
             onChange={changeInputHandler}
             className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
           />

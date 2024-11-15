@@ -1,12 +1,17 @@
+import axios from "axios";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "../store/userSlice";
 
 const Login = () => {
   const [userData, setUserData] = useState({
     email: "",
     password: "",
   });
-  const [error] = useState<string | null>("This is an error message");
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const changeInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -16,9 +21,25 @@ const Login = () => {
     }));
   };
 
-  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Handle form submission
+    setError(null);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/login`,
+        userData
+      );
+      const user = await response.data;
+      dispatch(setUser(user));
+      navigate("/");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.error);
+      } else {
+        setError(String(error));
+      }
+    }
   };
 
   return (
