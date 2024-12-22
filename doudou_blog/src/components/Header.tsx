@@ -8,6 +8,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store";
 
 const Header = () => {
+  const user = useSelector((state: RootState) => state.user.user);
+  const name = user?.username;
   const [isMdScreen, setIsMdScreen] = useState(() => {
     if (window.innerWidth > 768) return true;
     return false;
@@ -26,9 +28,6 @@ const Header = () => {
 
   // 使用 lodash 的 throttle 函数
   const throttledHandleResize = throttle(handleResize, 100);
-
-  // 使用 useSelector 钩子访问 Redux 中的用户状态
-  const user = useSelector((state: RootState) => state.user.user);
 
   // 添加和移除窗口 resize 事件监听器
   useEffect(() => {
@@ -61,7 +60,7 @@ const Header = () => {
                     onClick={() => setIsDropdown(false)}
                     className="bg-orange-100 rounded-lg p-2 w-full inline-block text-black hover:text-orange-600"
                   >
-                    Ernest Achiever
+                    {name}'s Profile
                   </Link>
                 </li>
                 <li>
@@ -80,6 +79,15 @@ const Header = () => {
                     className="bg-orange-100 rounded-lg p-2 w-full inline-block text-black hover:text-orange-600"
                   >
                     Authors
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/themes"
+                    onClick={() => setIsDropdown(false)}
+                    className="bg-orange-100 rounded-lg p-2 w-full inline-block text-black hover:text-orange-600"
+                  >
+                    Themes
                   </Link>
                 </li>
                 <li>

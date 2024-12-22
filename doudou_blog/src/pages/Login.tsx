@@ -9,7 +9,7 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -24,18 +24,19 @@ const Login = () => {
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Handle form submission
-    setError(null);
+    // setError(null);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/users/login`,
-        userData
+        userData,
+        { withCredentials: true }
       );
       const user = await response.data;
       dispatch(setUser(user));
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        setError(error.response.data.error);
+        setError(error.response.data.message);
       } else {
         setError(String(error));
       }

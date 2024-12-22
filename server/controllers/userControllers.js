@@ -43,11 +43,20 @@ const registerUser = async (req, res, next) => {
       { expiresIn: "1h" }
     );
 
-    // 返回令牌和用户信息
+    // 将令牌存储在 HTTPOnly cookie 中
+    // 将令牌存储在 HTTPOnly cookie 中
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+    });
+
+    // 返回用户信息
     res.status(200).json({
       userId: newUser.id,
+      username: newUser.username,
       email: newUser.email,
-      token,
+      token: token,
     });
   } catch (error) {
     console.log(error);
@@ -92,11 +101,20 @@ const loginUser = async (req, res, next) => {
       { expiresIn: "1h" }
     );
 
-    // 返回令牌和用户信息
+    // 将令牌存储在 HTTPOnly cookie 中
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+    });
+    // console.log("Set-Cookie header:", res.getHeaders()["set-cookie"]);
+
+    // 返回用户信息
     res.status(200).json({
       userId: user.id,
       email: user.email,
-      token,
+      username: user.username,
+      token: token,
     });
   } catch (error) {
     // 处理捕获到的任何异常

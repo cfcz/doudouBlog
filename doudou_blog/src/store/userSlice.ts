@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface User {
   userId: string;
   email: string;
+  username: string;
   token: string;
 }
 

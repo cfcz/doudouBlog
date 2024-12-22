@@ -16,6 +16,8 @@ import AuthorPosts from "./pages/AuthorPosts.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import EditPost from "./pages/EditPost.tsx";
 import Logout from "./pages/Logout.tsx";
+import Themes from "./pages/Themes.tsx";
+import MyPage from "./pages/MyPage.tsx";
 
 import store from "./store/index.ts";
 import { Provider } from "react-redux";
@@ -38,6 +40,8 @@ const BrowserRouter = createBrowserRouter([
       { path: "authors", element: <Authors /> },
       { path: "create", element: <CreatePost /> },
       { path: "register", element: <Register /> },
+      { path: "themes", element: <Themes /> },
+      { path: "myPage", element: <MyPage /> },
       { path: "posts/categories/:category", element: <CategoryPost /> },
       { path: "posts/users/:id", element: <AuthorPosts /> },
       { path: "myposts/:id", element: <Dashboard /> },
