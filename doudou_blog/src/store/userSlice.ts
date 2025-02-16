@@ -1,35 +1,47 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface User {
+// Types
+export interface User {
   userId: string;
   email: string;
   username: string;
   token: string;
 }
 
-interface UserState {
+export interface UserState {
   user: User | null;
 }
 
-const initialState: UserState = {
-  user: null,
+// Local Storage
+const USER_STORAGE_KEY = "user";
+const loadUserFromStorage = (): User | null => {
+  const stored = localStorage.getItem(USER_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : null;
 };
 
+// Slice
 const userSlice = createSlice({
   name: "user",
-  initialState,
+  initialState: {
+    user: loadUserFromStorage(),
+  },
   reducers: {
-    //理解成对状态进行的处理
-    setUser(state, action: PayloadAction<User>) {
+    setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
-      localStorage.setItem("user", JSON.stringify(action.payload));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(action.payload));
     },
-    clearUser(state) {
+    clearUser: (state) => {
       state.user = null;
-      localStorage.removeItem("user");
+      localStorage.removeItem(USER_STORAGE_KEY);
     },
   },
 });
 
+// Selectors
+export const selectUser = (state: { user: UserState }) => state.user.user;
+export const selectIsAuthenticated = (state: { user: UserState }) =>
+  !!state.user.user;
+
+// Exports
 export const { setUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;

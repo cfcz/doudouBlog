@@ -40,15 +40,15 @@ const registerUser = async (req, res, next) => {
     const token = jwt.sign(
       { userId: newUser.id, email: newUser.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "10d" } // 改为10天
     );
 
-    // 将令牌存储在 HTTPOnly cookie 中
     // 将令牌存储在 HTTPOnly cookie 中
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
+      maxAge: 10 * 24 * 60 * 60 * 1000, // 10天的毫秒数
     });
 
     // 返回用户信息
@@ -98,7 +98,7 @@ const loginUser = async (req, res, next) => {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "30d" } // 改为30天
     );
 
     // 将令牌存储在 HTTPOnly cookie 中
@@ -106,6 +106,7 @@ const loginUser = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30天的毫秒数
     });
     // console.log("Set-Cookie header:", res.getHeaders()["set-cookie"]);
 

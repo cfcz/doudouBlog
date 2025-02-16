@@ -23,16 +23,20 @@ const Login = () => {
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission
-    // setError(null);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/users/login`,
         userData,
         { withCredentials: true }
       );
-      const user = await response.data;
-      dispatch(setUser(user));
+
+      const { token, ...userInfo } = response.data;
+
+      // 使用 localStorage 替代 sessionStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      dispatch(setUser({ ...userInfo, token }));
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

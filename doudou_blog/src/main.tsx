@@ -9,15 +9,9 @@ import PostDetail from "./pages/PostDetail.tsx";
 import Register from "./pages/Register.tsx";
 import Login from "./pages/Login.tsx";
 import UserProfile from "./pages/UserProfile.tsx";
-import Authors from "./pages/Authors.tsx";
-import CreatePost from "./pages/CreatePost.tsx";
 import CategoryPost from "./pages/CategoryPost.tsx";
 import AuthorPosts from "./pages/AuthorPosts.tsx";
-import Dashboard from "./pages/Dashboard.tsx";
-import EditPost from "./pages/EditPost.tsx";
 import Logout from "./pages/Logout.tsx";
-import Themes from "./pages/Themes.tsx";
-import MyPage from "./pages/MyPage.tsx";
 
 import store from "./store/index.ts";
 import { Provider } from "react-redux";
@@ -33,19 +27,12 @@ const BrowserRouter = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
-      { path: "posts/:id", element: <PostDetail /> },
-      { path: "register", element: <Register /> },
-      { path: "login", element: <Login /> },
-      { path: "profile", element: <UserProfile /> },
-      { path: "authors", element: <Authors /> },
-      { path: "create", element: <CreatePost /> },
-      { path: "register", element: <Register /> },
-      { path: "themes", element: <Themes /> },
-      { path: "myPage", element: <MyPage /> },
-      { path: "posts/categories/:category", element: <CategoryPost /> },
-      { path: "posts/users/:id", element: <AuthorPosts /> },
-      { path: "myposts/:id", element: <Dashboard /> },
-      { path: "posts/:id/edit", element: <EditPost /> },
+      { path: "posts/:id", element: <PostDetail /> }, //查看某篇内容
+      { path: "register", element: <Register /> }, //注册-简略版本
+      { path: "login", element: <Login /> }, //登录-简略版本
+      { path: "profile", element: <UserProfile /> }, //个人主页
+      { path: "posts/categories/:category", element: <CategoryPost /> }, //分类的文章
+      { path: "posts/users/:id", element: <AuthorPosts /> }, //个人的文章展示不确定现在要不要
       { path: "logout", element: <Logout /> },
     ],
   },

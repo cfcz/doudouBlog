@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import Avatar from "../assets/logo.png";
 import { FaCheck, FaEdit } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { selectUser } from "../store/userSlice";
 import instance from "../utils";
 
 const UserProfile = () => {
   // 使用 useSelector 钩子访问 Redux 中的用户状态
-  const user = useSelector((state: RootState) => state.user.user);
+  const user = useSelector(selectUser);
   const [avatar, setAvatar] = useState(Avatar);
   const [name, setName] = useState(user?.username);
   const [email, setEmail] = useState(user?.email);

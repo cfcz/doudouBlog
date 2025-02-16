@@ -1,0 +1,6 @@
+# ...existing entries...
+
+# Ignore uploaded files
+server/uploads/*
+!server/uploads/images/.gitkeep
+!server/uploads/videos/.gitkeep

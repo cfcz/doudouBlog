@@ -1,12 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {
-      clipPath: {
-        circle: "circle(50% at 50% 50%)",
-      },
-    },
+    extend: {},
   },
-  plugins: [require("tailwind-clip-path")],
+  plugins: [require("@tailwindcss/typography")],
 };

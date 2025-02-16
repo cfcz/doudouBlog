@@ -6,13 +6,22 @@ const notFound = (req, res, next) => {
 };
 
 //Error handling middleware
-const errorHandler = (error, req, res, next) => {
-  if (res.headerSent) {
-    next(error);
+const errorHandler = (err, req, res, next) => {
+  // 处理 Multer 错误
+  if (err.code === "LIMIT_UNEXPECTED_FILE") {
+    return res.status(400).json({
+      message: "文件上传失败: 意外的文件字段",
+      error: err.code,
+    });
   }
-  res
-    .status(error.code || 500)
-    .json({ message: error.message || "Internal Server Error" });
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Server Error";
+
+  res.status(statusCode).json({
+    message,
+    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+  });
 };
 
 module.exports = { notFound, errorHandler };

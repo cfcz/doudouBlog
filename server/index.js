@@ -2,29 +2,45 @@ const express = require("express");
 const cors = require("cors");
 const { connect } = require("mongoose");
 require("dotenv").config();
-const upload = require("express-fileupload");
+const path = require("path");
 
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
+const layoutRoutes = require("./routes/layoutRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 const app = express();
 
-// CORS configuration
+// 更新 CORS 配置
 const corsOptions = {
-  origin: ["http://localhost:3000", "http://localhost:5173"],
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+  ],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  maxAge: 86400, // 预检请求结果缓存24小时
 };
 
-app.use(cors(corsOptions));
+// 添加详细的请求日志
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+  next();
+});
 
+app.use(cors(corsOptions));
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
-app.use(upload());
-app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/layout", layoutRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
