@@ -20,12 +20,18 @@ const getPostComments = async (req, res) => {
         populate: [
           { path: "author", select: "username email" },
           { path: "likes", select: "username" },
+          {
+            path: "parentComment",
+            select: "author",
+            populate: { path: "author", select: "username" },
+          },
         ],
       })
       .sort({ createdAt: -1 });
 
     res.status(200).json(comments);
   } catch (error) {
+    console.log(error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -34,7 +40,8 @@ const getPostComments = async (req, res) => {
 const createComment = async (req, res) => {
   try {
     const { content, postId, parentCommentId } = req.body;
-    console.log(content, postId, parentCommentId);
+    // console.log(req);
+    let rootCommentId; //祖先评论的id
     // 检查文章是否存在
     const post = await Post.findById(postId);
     if (!post) {
@@ -46,6 +53,12 @@ const createComment = async (req, res) => {
       const parentComment = await Comment.findById(parentCommentId);
       if (!parentComment || parentComment.isDeleted) {
         return res.status(404).json({ message: "父评论不存在或已被删除" });
+      } else if (!parentComment.parentComment) {
+        //父评论是对文章的回复
+        rootCommentId = parentCommentId;
+      } else {
+        //父评论是对评论的回复;
+        rootCommentId = parentComment.rootComment;
       }
     }
 
@@ -54,6 +67,7 @@ const createComment = async (req, res) => {
       post: postId,
       author: req.user._id,
       parentComment: parentCommentId || null,
+      rootComment: rootCommentId || null,
     });
 
     // populate必要的信息后返回

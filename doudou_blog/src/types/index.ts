@@ -38,7 +38,8 @@ export interface Comment {
     username: string;
     email: string;
   };
-  parentComment: string | null;
+  parentComment: Comment | null;
+  rootComment: string | null;
   likes: Array<{
     _id: string;
     username: string;
@@ -46,7 +47,7 @@ export interface Comment {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  replies?: Comment[];
+  replies: Comment[] | [];
   likeCount?: number;
 }
 

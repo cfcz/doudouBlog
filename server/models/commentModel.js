@@ -22,6 +22,11 @@ const commentSchema = new mongoose.Schema(
       ref: "Comment",
       default: null,
     },
+    rootComment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+      default: null,
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -51,12 +56,12 @@ const commentSchema = new mongoose.Schema(
 commentSchema.virtual("replies", {
   ref: "Comment",
   localField: "_id",
-  foreignField: "parentComment",
+  foreignField: "rootComment",
 });
 
 // 添加虚拟字段获取点赞数
 commentSchema.virtual("likeCount").get(function () {
-  return this.likes.length;
+  return this.likes ? this.likes.length : 0;
 });
 
 // 更新时间戳

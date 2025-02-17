@@ -150,7 +150,7 @@ const PostDetails = () => {
               关于作者
             </h3>
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justifycenter text-orange-500 font-bold text-2xl">
+              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 font-bold text-2xl">
                 {username.charAt(0).toUpperCase()}
               </div>
               <div>
