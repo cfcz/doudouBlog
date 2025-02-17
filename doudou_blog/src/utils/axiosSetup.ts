@@ -5,7 +5,24 @@ import { clearUser } from "../store/userSlice";
 // 创建 axios 实例
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
+
+// 添加请求拦截器
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // 在发送请求前检查并打印认证头
+    if (config.headers.Authorization) {
+      console.log("Request headers:", config.headers);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // 响应拦截器
 axiosInstance.interceptors.response.use(
@@ -22,6 +39,9 @@ axiosInstance.interceptors.response.use(
         // 重定向到登录页
         window.location.href = "/login";
       }
+    }
+    if (error.response) {
+      console.error("Response error:", error.response.data);
     }
     return Promise.reject(error);
   }

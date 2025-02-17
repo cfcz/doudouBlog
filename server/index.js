@@ -8,6 +8,7 @@ const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const layoutRoutes = require("./routes/layoutRoutes");
+const commentRoutes = require("./routes/commentRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 const app = express();
@@ -27,8 +28,8 @@ const corsOptions = {
 
 // 添加详细的请求日志
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+  // console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  // console.log("Headers:", JSON.stringify(req.headers, null, 2));
   next();
 });
 
@@ -41,6 +42,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/layout", layoutRoutes);
+app.use("/api/comments", commentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

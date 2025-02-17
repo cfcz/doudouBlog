@@ -28,3 +28,30 @@ export interface Layout {
     order: number;
   }>;
 }
+
+export interface Comment {
+  _id: string;
+  content: string;
+  post: string;
+  author: {
+    _id: string;
+    username: string;
+    email: string;
+  };
+  parentComment: string | null;
+  likes: Array<{
+    _id: string;
+    username: string;
+  }>;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  replies?: Comment[];
+  likeCount?: number;
+}
+
+export interface CommentProps {
+  postId: string;
+  token: string;
+  userId: string;
+}
