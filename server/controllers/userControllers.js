@@ -267,6 +267,104 @@ const getAuthors = async (req, res, next) => {
   }
 };
 
+//api/users/follow/:id
+const followUser = async (req, res, next) => {
+  try {
+    const userToFollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.user.userId);
+
+    if (!userToFollow || !currentUser) {
+      return next(new HttpError("User not found", 404));
+    }
+
+    if (req.user.userId === req.params.id) {
+      return next(new HttpError("You cannot follow yourself", 422));
+    }
+
+    if (currentUser.followedUsers.includes(req.params.id)) {
+      return next(new HttpError("You already follow this user", 422));
+    }
+
+    // 更新当前用户的关注列表
+    await User.findByIdAndUpdate(req.user.userId, {
+      $push: { followedUsers: req.params.id },
+    });
+
+    // 更新被关注用户的粉丝列表
+    await User.findByIdAndUpdate(req.params.id, {
+      $push: { followers: req.user.userId },
+    });
+
+    res.status(200).json({ message: "User followed successfully" });
+  } catch (error) {
+    return next(new HttpError(error.message, error.statusCode));
+  }
+};
+
+//api/users/unfollow/:id
+const unfollowUser = async (req, res, next) => {
+  try {
+    const userToUnfollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.user.userId);
+
+    if (!userToUnfollow || !currentUser) {
+      return next(new HttpError("User not found", 404));
+    }
+
+    if (!currentUser.followedUsers.includes(req.params.id)) {
+      return next(new HttpError("You are not following this user", 422));
+    }
+
+    // 更新当前用户的关注列表
+    await User.findByIdAndUpdate(req.user.userId, {
+      $pull: { followedUsers: req.params.id },
+    });
+
+    // 更新被取消关注用户的粉丝列表
+    await User.findByIdAndUpdate(req.params.id, {
+      $pull: { followers: req.user.userId },
+    });
+
+    res.status(200).json({ message: "User unfollowed successfully" });
+  } catch (error) {
+    return next(new HttpError(error.message, error.statusCode));
+  }
+};
+
+//api/users/:id/following
+const getFollowedUsers = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate("followedUsers", "-password")
+      .select("followedUsers");
+
+    if (!user) {
+      return next(new HttpError("User not found", 404));
+    }
+
+    res.status(200).json(user.followedUsers);
+  } catch (error) {
+    return next(new HttpError(error.message, error.statusCode));
+  }
+};
+
+//api/users/:id/followers
+const getFollowers = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate("followers", "-password")
+      .select("followers");
+
+    if (!user) {
+      return next(new HttpError("User not found", 404));
+    }
+
+    res.status(200).json(user.followers);
+  } catch (error) {
+    return next(new HttpError(error.message, error.statusCode));
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -274,4 +372,8 @@ module.exports = {
   changeAvatar,
   editUser,
   getAuthors,
+  followUser,
+  unfollowUser,
+  getFollowedUsers,
+  getFollowers,
 };

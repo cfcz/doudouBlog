@@ -7,7 +7,12 @@ const {
   changeAvatar,
   editUser,
   getAuthors,
+  followUser,
+  unfollowUser,
+  getFollowedUsers,
+  getFollowers,
 } = require("../controllers/userControllers");
+
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = Router();
@@ -18,5 +23,10 @@ router.get("/:id", getUser);
 router.post("/change-avatar", authMiddleware, changeAvatar);
 router.patch("/edit-user", authMiddleware, editUser);
 router.get("/", getAuthors);
+// 关注相关路由
+router.post("/follow/:id", authMiddleware, followUser);
+router.post("/unfollow/:id", authMiddleware, unfollowUser);
+router.get("/:id/following", getFollowedUsers);
+router.get("/:id/followers", getFollowers);
 
 module.exports = router;
