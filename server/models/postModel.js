@@ -30,10 +30,42 @@ const postSchema = new Schema(
         filename: String,
       },
     ],
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    favorites: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    favoritesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// 添加虚拟字段来快速检查用户是否已点赞/收藏
+postSchema.virtual("isLiked").get(function () {
+  return this.likes.includes(this._userId);
+});
+
+postSchema.virtual("isFavorited").get(function () {
+  return this.favorites.includes(this._userId);
+});
+
+// 设置 toJSON 选项以包含虚拟字段
+postSchema.set("toJSON", { virtuals: true });
 
 module.exports = model("Post", postSchema);

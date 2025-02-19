@@ -13,6 +13,13 @@ export interface Post {
     type: string;
     filename: string;
   }>;
+  // 添加点赞和收藏相关字段
+  likes: Array<string>; // 点赞用户的ID数组
+  likesCount: number;
+  isLiked?: boolean; // 当前用户是否点赞
+  favorites: Array<string>; // 收藏用户的ID数组
+  favoritesCount: number;
+  isFavorited?: boolean; // 当前用户是否收藏
   createdAt: string;
   updatedAt: string;
 }
@@ -55,4 +62,10 @@ export interface CommentProps {
   postId: string;
   token: string;
   userId: string;
+}
+
+export interface Author {
+  _id: string;
+  username: string;
+  email: string;
 }

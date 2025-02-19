@@ -86,7 +86,7 @@ const Sidebar = () => {
           {user?.userId && (
             <li>
               <Link
-                to="/profile"
+                to={`/profile/${user.userId}`}
                 className="flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 p-2 rounded-lg hover:bg-orange-50 dark:hover:bg-gray-700"
               >
                 <BiUser className="mr-3 text-xl" />

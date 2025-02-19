@@ -271,7 +271,7 @@ const getAuthors = async (req, res, next) => {
 const followUser = async (req, res, next) => {
   try {
     const userToFollow = await User.findById(req.params.id);
-    const currentUser = await User.findById(req.user.userId);
+    const currentUser = await User.findById(req.user._id);
 
     if (!userToFollow || !currentUser) {
       return next(new HttpError("User not found", 404));
@@ -286,13 +286,13 @@ const followUser = async (req, res, next) => {
     }
 
     // 更新当前用户的关注列表
-    await User.findByIdAndUpdate(req.user.userId, {
+    await User.findByIdAndUpdate(req.user._id, {
       $push: { followedUsers: req.params.id },
     });
 
     // 更新被关注用户的粉丝列表
     await User.findByIdAndUpdate(req.params.id, {
-      $push: { followers: req.user.userId },
+      $push: { followers: req.user._id },
     });
 
     res.status(200).json({ message: "User followed successfully" });
@@ -305,7 +305,7 @@ const followUser = async (req, res, next) => {
 const unfollowUser = async (req, res, next) => {
   try {
     const userToUnfollow = await User.findById(req.params.id);
-    const currentUser = await User.findById(req.user.userId);
+    const currentUser = await User.findById(req.user._id);
 
     if (!userToUnfollow || !currentUser) {
       return next(new HttpError("User not found", 404));
@@ -316,13 +316,13 @@ const unfollowUser = async (req, res, next) => {
     }
 
     // 更新当前用户的关注列表
-    await User.findByIdAndUpdate(req.user.userId, {
+    await User.findByIdAndUpdate(req.user._id, {
       $pull: { followedUsers: req.params.id },
     });
 
     // 更新被取消关注用户的粉丝列表
     await User.findByIdAndUpdate(req.params.id, {
-      $pull: { followers: req.user.userId },
+      $pull: { followers: req.user._id },
     });
 
     res.status(200).json({ message: "User unfollowed successfully" });

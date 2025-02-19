@@ -26,7 +26,7 @@ const authMiddleware = async (req, res, next) => {
 
     // 将用户信息添加到请求对象中
     req.user = user;
-    console.log("认证成功，用户信息：", { id: user._id, email: user.email });
+    // console.log("认证成功，用户信息：", { id: user._id, email: user.email });
     next();
   } catch (error) {
     console.error("认证错误：", error);

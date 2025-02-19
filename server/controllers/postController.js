@@ -1,4 +1,5 @@
 const Post = require("../models/postModel");
+const User = require("../models/userModels");
 const { deleteUnusedFile } = require("../utils/fileManager");
 
 const createPost = async (req, res, next) => {
@@ -89,24 +90,28 @@ const getPosts = async (req, res, next) => {
   }
 };
 
+// 修改 getPost 函数，添加点赞和收藏状态
 const getPost = async (req, res, next) => {
   try {
-    console.log("Getting post with ID:", req.params.id); // 添加调试日志
-
     const post = await Post.findById(req.params.id).populate(
       "creator",
       "username email"
-    ); // 确保填充创建者信息
+    );
 
     if (!post) {
-      console.log("Post not found"); // 添加调试日志
       return res.status(404).json({ message: "文章不存在" });
     }
 
-    console.log("Found post:", post); // 添加调试日志
+    // 如果用户已登录，检查用户是否已点赞和收藏
+    if (req.user) {
+      const user = await User.findById(req.user._id);
+      post._userId = req.user._id; // 为虚拟字段设置当前用户ID
+      post.isLiked = user.likedPosts.includes(post._id);
+      post.isFavorited = user.favoritePosts.includes(post._id);
+    }
+
     res.json(post);
   } catch (error) {
-    console.error("Error fetching post:", error); // 添加错误日志
     next(error);
   }
 };
@@ -204,6 +209,120 @@ const deletePost = async (req, res, next) => {
   }
 };
 
+// 点赞文章
+const likePost = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    const user = await User.findById(req.user._id);
+
+    if (!post || !user) {
+      return res.status(404).json({ message: "Post or user not found" });
+    }
+
+    const isLiked = await user.toggleLike(post._id);
+
+    // 更新文章的点赞数和点赞用户列表
+    if (isLiked) {
+      post.likes.push(user._id);
+      post.likesCount += 1;
+    } else {
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== user._id.toString()
+      );
+      post.likesCount = Math.max(0, post.likesCount - 1);
+    }
+    await post.save();
+
+    res.json({
+      message: isLiked
+        ? "Post liked successfully"
+        : "Post unliked successfully",
+      likesCount: post.likesCount,
+      isLiked,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 收藏文章
+const favoritePost = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    const user = await User.findById(req.user._id);
+
+    if (!post || !user) {
+      return res.status(404).json({ message: "Post or user not found" });
+    }
+
+    const isFavorited = await user.toggleFavorite(post._id);
+
+    // 更新文章的收藏数和收藏用户列表
+    if (isFavorited) {
+      post.favorites.push(user._id);
+      post.favoritesCount += 1;
+    } else {
+      post.favorites = post.favorites.filter(
+        (id) => id.toString() !== user._id.toString()
+      );
+      post.favoritesCount = Math.max(0, post.favoritesCount - 1);
+    }
+    await post.save();
+
+    res.json({
+      message: isFavorited
+        ? "Post favorited successfully"
+        : "Post unfavorited successfully",
+      favoritesCount: post.favoritesCount,
+      isFavorited,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取用户收藏的文章列表
+const getFavoritePosts = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.userId).populate({
+      path: "favoritePosts",
+      populate: {
+        path: "creator",
+        select: "username email",
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.favoritePosts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取用户点赞的文章列表
+const getLikedPosts = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.userId).populate({
+      path: "likedPosts",
+      populate: {
+        path: "creator",
+        select: "username email",
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.likedPosts);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -212,4 +331,8 @@ module.exports = {
   getUserPost,
   editPost,
   deletePost,
+  likePost,
+  favoritePost,
+  getFavoritePosts,
+  getLikedPosts,
 };

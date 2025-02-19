@@ -51,7 +51,7 @@ const Posts = () => {
     };
 
     fetchPosts();
-  }, [user]);
+  }, [user?.token]);
 
   if (loading) return <div className="text-center p-10">Loading...</div>;
   if (error)

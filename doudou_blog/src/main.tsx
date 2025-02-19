@@ -30,7 +30,7 @@ const BrowserRouter = createBrowserRouter([
       { path: "posts/:id", element: <PostDetail /> }, //查看某篇内容
       { path: "register", element: <Register /> }, //注册-简略版本
       { path: "login", element: <Login /> }, //登录-简略版本
-      { path: "profile", element: <UserProfile /> }, //个人主页
+      { path: "profile/:userId", element: <UserProfile /> }, // 修改为用户详情页路由
       { path: "posts/categories/:category", element: <CategoryPost /> }, //分类的文章
       { path: "posts/users/:id", element: <AuthorPosts /> }, //个人的文章展示不确定现在要不要
       { path: "logout", element: <Logout /> },

@@ -3,12 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { selectUser } from "../store/userSlice";
-
-interface Author {
-  _id: string;
-  username: string;
-  email: string;
-}
+import { Author } from "../types";
 
 const PostAuthor = ({ authorID }: { authorID: string }) => {
   const [author, setAuthor] = useState<Author | null>(null);
@@ -39,7 +34,7 @@ const PostAuthor = ({ authorID }: { authorID: string }) => {
     if (authorID) {
       fetchAuthor();
     }
-  }, [authorID, user]);
+  }, [authorID, user?.token]);
 
   if (isLoading) {
     return (

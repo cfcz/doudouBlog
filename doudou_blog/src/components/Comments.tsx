@@ -26,7 +26,6 @@ const Comments: React.FC<CommentProps> = ({ postId, token, userId }) => {
           "Content-Type": "application/json",
         },
       });
-      console.log(JSON.stringify(response.data));
       setComments(response.data);
     } catch (error) {
       console.error("Error fetching comments:", error);

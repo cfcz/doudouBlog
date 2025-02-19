@@ -10,6 +10,41 @@ const userSchema = new Schema({
   postCount: { type: Number, default: 0 }, // 用户发布的文章数量
   likeCount: { type: Number, default: 0 }, // 点赞的总数
   favoriteCount: { type: Number, default: 0 }, // 收藏的总数
+  likedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
+  favoritePosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
 });
+
+// 添加方法来处理点赞和收藏
+userSchema.methods.toggleLike = async function (postId) {
+  const isLiked = this.likedPosts.includes(postId);
+  if (isLiked) {
+    this.likedPosts.pull(postId);
+  } else {
+    this.likedPosts.push(postId);
+  }
+  await this.save();
+  return !isLiked;
+};
+
+userSchema.methods.toggleFavorite = async function (postId) {
+  const isFavorited = this.favoritePosts.includes(postId);
+  if (isFavorited) {
+    this.favoritePosts.pull(postId);
+  } else {
+    this.favoritePosts.push(postId);
+  }
+  await this.save();
+  return !isFavorited;
+};
 
 module.exports = model("User", userSchema);

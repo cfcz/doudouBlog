@@ -8,6 +8,10 @@ const {
   getUserPost,
   editPost,
   deletePost,
+  likePost,
+  favoritePost,
+  getFavoritePosts,
+  getLikedPosts,
 } = require("../controllers/postController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -27,5 +31,11 @@ router.get("/categories/:category", authMiddleware, getCatPosts);
 router.get("/users/:id", authMiddleware, getUserPost);
 router.patch("/:id", authMiddleware, editPost);
 router.delete("/:id", authMiddleware, deletePost);
+
+// 点赞和收藏相关路由
+router.post("/:id/like", authMiddleware, likePost);
+router.post("/:id/favorite", authMiddleware, favoritePost);
+router.get("/favorites/:userId", authMiddleware, getFavoritePosts);
+router.get("/likes/:userId", authMiddleware, getLikedPosts);
 
 module.exports = router;
