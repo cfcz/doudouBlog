@@ -5,6 +5,7 @@ const {
   createComment,
   toggleLikeComment,
   deleteComment,
+  getCommentStats, // 添加这一行
 } = require("../controllers/commentController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -22,5 +23,8 @@ router.post("/:commentId/like", toggleLikeComment);
 
 // 删除评论
 router.delete("/:commentId", deleteComment);
+
+// 获取评论统计数据
+router.get("/stats", authMiddleware, getCommentStats);
 
 module.exports = router;

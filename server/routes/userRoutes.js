@@ -11,6 +11,7 @@ const {
   unfollowUser,
   getFollowedUsers,
   getFollowers,
+  getUserStats,
 } = require("../controllers/userControllers");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -28,5 +29,7 @@ router.post("/follow/:id", authMiddleware, followUser);
 router.post("/unfollow/:id", authMiddleware, unfollowUser);
 router.get("/:id/following", getFollowedUsers);
 router.get("/:id/followers", getFollowers);
+// 获取用户统计数据
+router.get("/:id/stats", authMiddleware, getUserStats);
 
 module.exports = router;

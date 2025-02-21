@@ -219,26 +219,30 @@ const likePost = async (req, res, next) => {
       return res.status(404).json({ message: "Post or user not found" });
     }
 
-    const isLiked = await user.toggleLike(post._id);
+    const existingLike = post.likes.find(
+      (like) => like.user.toString() === user._id.toString()
+    );
 
-    // 更新文章的点赞数和点赞用户列表
-    if (isLiked) {
-      post.likes.push(user._id);
-      post.likesCount += 1;
-    } else {
+    if (existingLike) {
+      // 取消点赞
       post.likes = post.likes.filter(
-        (id) => id.toString() !== user._id.toString()
+        (like) => like.user.toString() !== user._id.toString()
       );
       post.likesCount = Math.max(0, post.likesCount - 1);
+      await user.toggleLike(post._id);
+    } else {
+      // 添加点赞
+      post.likes.push({ user: user._id, createdAt: new Date() });
+      post.likesCount += 1;
+      await user.toggleLike(post._id);
     }
+
     await post.save();
 
     res.json({
-      message: isLiked
-        ? "Post liked successfully"
-        : "Post unliked successfully",
+      message: existingLike ? "Post unliked" : "Post liked",
       likesCount: post.likesCount,
-      isLiked,
+      isLiked: !existingLike,
     });
   } catch (error) {
     next(error);
@@ -255,26 +259,30 @@ const favoritePost = async (req, res, next) => {
       return res.status(404).json({ message: "Post or user not found" });
     }
 
-    const isFavorited = await user.toggleFavorite(post._id);
+    const existingFavorite = post.favorites.find(
+      (fav) => fav.user.toString() === user._id.toString()
+    );
 
-    // 更新文章的收藏数和收藏用户列表
-    if (isFavorited) {
-      post.favorites.push(user._id);
-      post.favoritesCount += 1;
-    } else {
+    if (existingFavorite) {
+      // 取消收藏
       post.favorites = post.favorites.filter(
-        (id) => id.toString() !== user._id.toString()
+        (fav) => fav.user.toString() !== user._id.toString()
       );
       post.favoritesCount = Math.max(0, post.favoritesCount - 1);
+      await user.toggleFavorite(post._id);
+    } else {
+      // 添加收藏
+      post.favorites.push({ user: user._id, createdAt: new Date() });
+      post.favoritesCount += 1;
+      await user.toggleFavorite(post._id);
     }
+
     await post.save();
 
     res.json({
-      message: isFavorited
-        ? "Post favorited successfully"
-        : "Post unfavorited successfully",
+      message: existingFavorite ? "Post unfavorited" : "Post favorited",
       favoritesCount: post.favoritesCount,
-      isFavorited,
+      isFavorited: !existingFavorite,
     });
   } catch (error) {
     next(error);
@@ -323,6 +331,110 @@ const getLikedPosts = async (req, res, next) => {
   }
 };
 
+// 新增统计接口
+const getPostStats = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+    const stats = await Post.aggregate([
+      {
+        $facet: {
+          // 近7天和30天的点赞统计
+          likes: [
+            { $unwind: "$likes" },
+            {
+              $group: {
+                _id: null,
+                last7Days: {
+                  $sum: {
+                    $cond: [{ $gte: ["$likes.createdAt", sevenDaysAgo] }, 1, 0],
+                  },
+                },
+                last30Days: {
+                  $sum: {
+                    $cond: [
+                      { $gte: ["$likes.createdAt", thirtyDaysAgo] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          // 近7天和30天的收藏统计
+          favorites: [
+            { $unwind: "$favorites" },
+            {
+              $group: {
+                _id: null,
+                last7Days: {
+                  $sum: {
+                    $cond: [
+                      { $gte: ["$favorites.createdAt", sevenDaysAgo] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                last30Days: {
+                  $sum: {
+                    $cond: [
+                      { $gte: ["$favorites.createdAt", thirtyDaysAgo] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          // 近7天和30天的评论统计
+          comments: [
+            { $unwind: "$comments" },
+            {
+              $group: {
+                _id: null,
+                last7Days: {
+                  $sum: {
+                    $cond: [
+                      { $gte: ["$comments.createdAt", sevenDaysAgo] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                last30Days: {
+                  $sum: {
+                    $cond: [
+                      { $gte: ["$comments.createdAt", thirtyDaysAgo] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          likes: { $arrayElemAt: ["$likes", 0] },
+          favorites: { $arrayElemAt: ["$favorites", 0] },
+          comments: { $arrayElemAt: ["$comments", 0] },
+        },
+      },
+    ]);
+
+    res.json(stats[0]);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -335,4 +447,5 @@ module.exports = {
   favoritePost,
   getFavoritePosts,
   getLikedPosts,
+  getPostStats,
 };

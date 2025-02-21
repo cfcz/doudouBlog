@@ -140,9 +140,57 @@ const deleteComment = async (req, res) => {
   }
 };
 
+// 获取评论统计数据
+const getCommentStats = async (req, res) => {
+  try {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+    const stats = await Comment.aggregate([
+      {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
+        $facet: {
+          totalStats: [
+            {
+              $group: {
+                _id: null,
+                last7Days: {
+                  $sum: {
+                    $cond: [{ $gte: ["$createdAt", sevenDaysAgo] }, 1, 0],
+                  },
+                },
+                last30Days: {
+                  $sum: {
+                    $cond: [{ $gte: ["$createdAt", thirtyDaysAgo] }, 1, 0],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          stats: { $arrayElemAt: ["$totalStats", 0] },
+        },
+      },
+    ]);
+
+    res.status(200).json(stats[0]?.stats || { last7Days: 0, last30Days: 0 });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPostComments,
   createComment,
   toggleLikeComment,
   deleteComment,
+  getCommentStats,
 };

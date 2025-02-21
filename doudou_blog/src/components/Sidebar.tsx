@@ -64,13 +64,15 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link
-              to="/posts"
+            <a
+              href="http://localhost:5174"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 p-2 rounded-lg hover:bg-orange-50 dark:hover:bg-gray-700"
             >
               <BiBookContent className="mr-3 text-xl" />
               Posts
-            </Link>
+            </a>
           </li>
           {!user?.userId && (
             <li>

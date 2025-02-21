@@ -365,6 +365,135 @@ const getFollowers = async (req, res, next) => {
   }
 };
 
+// 获取用户统计数据
+const getUserStats = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const now = new Date();
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+    // 1. 获取用户的文章列表
+    const userPosts = await Post.find({ creator: userId });
+    const postIds = userPosts.map((post) => post._id);
+
+    // 2. 统计获得的点赞数
+    const likesStats = await Post.aggregate([
+      {
+        $match: {
+          _id: { $in: postIds },
+        },
+      },
+      {
+        $unwind: "$likes",
+      },
+      {
+        $group: {
+          _id: null,
+          last7Days: {
+            $sum: {
+              $cond: [{ $gte: ["$likes.createdAt", sevenDaysAgo] }, 1, 0],
+            },
+          },
+          last30Days: {
+            $sum: {
+              $cond: [{ $gte: ["$likes.createdAt", thirtyDaysAgo] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    // 3. 统计获得的收藏数
+    const favoritesStats = await Post.aggregate([
+      {
+        $match: {
+          _id: { $in: postIds },
+        },
+      },
+      {
+        $unwind: "$favorites",
+      },
+      {
+        $group: {
+          _id: null,
+          last7Days: {
+            $sum: {
+              $cond: [{ $gte: ["$favorites.createdAt", sevenDaysAgo] }, 1, 0],
+            },
+          },
+          last30Days: {
+            $sum: {
+              $cond: [{ $gte: ["$favorites.createdAt", thirtyDaysAgo] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    // 4. 统计获得的评论数
+    const commentsStats = await Comment.aggregate([
+      {
+        $match: {
+          post: { $in: postIds },
+          isDeleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          last7Days: {
+            $sum: {
+              $cond: [{ $gte: ["$createdAt", sevenDaysAgo] }, 1, 0],
+            },
+          },
+          last30Days: {
+            $sum: {
+              $cond: [{ $gte: ["$createdAt", thirtyDaysAgo] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    // 5. 统计新增粉丝数
+    const followersStats = await User.aggregate([
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $unwind: "$followers",
+      },
+      {
+        $group: {
+          _id: null,
+          last7Days: {
+            $sum: {
+              $cond: [{ $gte: ["$followers.createdAt", sevenDaysAgo] }, 1, 0],
+            },
+          },
+          last30Days: {
+            $sum: {
+              $cond: [{ $gte: ["$followers.createdAt", thirtyDaysAgo] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      likes: likesStats[0] || { last7Days: 0, last30Days: 0 },
+      favorites: favoritesStats[0] || { last7Days: 0, last30Days: 0 },
+      comments: commentsStats[0] || { last7Days: 0, last30Days: 0 },
+      followers: followersStats[0] || { last7Days: 0, last30Days: 0 },
+    });
+  } catch (error) {
+    return next(new HttpError(error.message, error.statusCode));
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -376,4 +505,5 @@ module.exports = {
   unfollowUser,
   getFollowedUsers,
   getFollowers,
+  getUserStats,
 };

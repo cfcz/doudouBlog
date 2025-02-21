@@ -12,6 +12,7 @@ const {
   favoritePost,
   getFavoritePosts,
   getLikedPosts,
+  getPostStats, // 添加统计路由
 } = require("../controllers/postController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -37,5 +38,8 @@ router.post("/:id/like", authMiddleware, likePost);
 router.post("/:id/favorite", authMiddleware, favoritePost);
 router.get("/favorites/:userId", authMiddleware, getFavoritePosts);
 router.get("/likes/:userId", authMiddleware, getLikedPosts);
+
+// 添加统计路由
+router.get("/stats", authMiddleware, getPostStats);
 
 module.exports = router;
