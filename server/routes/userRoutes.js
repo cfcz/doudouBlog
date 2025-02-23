@@ -4,32 +4,17 @@ const {
   registerUser,
   loginUser,
   getUser,
-  changeAvatar,
-  editUser,
   getAuthors,
-  followUser,
-  unfollowUser,
-  getFollowedUsers,
-  getFollowers,
-  getUserStats,
+  refreshToken,
 } = require("../controllers/userControllers");
-
-const authMiddleware = require("../middleware/authMiddleware");
 
 const router = Router();
 
+//通用路由
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.post("/refresh-token", refreshToken);
 router.get("/:id", getUser);
-router.post("/change-avatar", authMiddleware, changeAvatar);
-router.patch("/edit-user", authMiddleware, editUser);
 router.get("/", getAuthors);
-// 关注相关路由
-router.post("/follow/:id", authMiddleware, followUser);
-router.post("/unfollow/:id", authMiddleware, unfollowUser);
-router.get("/:id/following", getFollowedUsers);
-router.get("/:id/followers", getFollowers);
-// 获取用户统计数据
-router.get("/:id/stats", authMiddleware, getUserStats);
 
 module.exports = router;

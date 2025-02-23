@@ -20,12 +20,15 @@ const Comments: React.FC<CommentProps> = ({ postId, token, userId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await axiosInstance.get(`/comments/post/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axiosInstance.get(
+        `/display/comments/post/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       setComments(response.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -36,7 +39,7 @@ const Comments: React.FC<CommentProps> = ({ postId, token, userId }) => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(
-        "/comments",
+        "/display/comments",
         {
           content: commentContent,
           postId,
@@ -102,7 +105,7 @@ const Comments: React.FC<CommentProps> = ({ postId, token, userId }) => {
   const handleLikeComment = async (commentId: string) => {
     try {
       const response = await axiosInstance.post(
-        `/comments/${commentId}/like`,
+        `/display/comments/${commentId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

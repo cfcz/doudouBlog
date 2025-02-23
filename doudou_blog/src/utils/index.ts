@@ -4,7 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from "axios";
-import store, { RootState } from "../store";
+import store, { RootState } from "../contexts";
 
 // 创建 Axios 实例
 const instance: AxiosInstance = axios.create({

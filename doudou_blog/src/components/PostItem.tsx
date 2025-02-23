@@ -44,7 +44,7 @@ const PostItem: React.FC<PostItemProps> = ({
           className="w-full h-full object-cover"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = "/default-thumbnail.jpg";
+            target.src = "/logo.png";
           }}
         />
       </div>

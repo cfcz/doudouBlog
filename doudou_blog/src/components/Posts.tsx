@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import PostItem from "./PostItem";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
+import { useGlobal } from "../contexts/GlobalContexts";
+import axiosInstance from "../utils/axiosSetup";
 
 interface Post {
   _id: string;
@@ -20,30 +19,15 @@ const Posts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const user = useSelector(selectUser);
+  const { user } = useGlobal();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        if (!user?.token) {
-          setError("Please login first");
-          return;
-        }
-
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/posts`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
+        const response = await axiosInstance.get(`/display/posts`);
         setPosts(response.data);
       } catch (err) {
-        setError(
-          "Failed to fetch posts: " +
-            (axios.isAxiosError(err) ? err.response?.data.message : err)
-        );
+        setError("Failed to fetch posts: " + err);
         console.error(err);
       } finally {
         setLoading(false);

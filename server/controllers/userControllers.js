@@ -36,27 +36,34 @@ const registerUser = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    // 生成 JWT 令牌
-    const token = jwt.sign(
-      { userId: newUser.id, email: newUser.email },
+    // 生成 Access Token
+    const access_token = jwt.sign(
+      { userId: newUser.id, email: newUser.email, scope: ["blog", "admin"] }, // 添加 scope 字段
       process.env.JWT_SECRET,
-      { expiresIn: "10d" } // 改为10天
+      { expiresIn: "15m" } // Access Token 有效期为 15 分钟
     );
 
-    // 将令牌存储在 HTTPOnly cookie 中
-    res.cookie("token", token, {
+    // 生成 Refresh Token
+    const refresh_token = jwt.sign(
+      { userId: newUser.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "30d" } // Refresh Token 有效期为 30 天
+    );
+
+    // 将 Refresh Token 存储在 HTTPOnly Cookie 中
+    res.cookie("refresh_token", refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 10 * 24 * 60 * 60 * 1000, // 10天的毫秒数
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30天的毫秒数
     });
 
-    // 返回用户信息
+    // 返回 Access Token 和用户信息
     res.status(200).json({
       userId: newUser.id,
-      username: newUser.username,
       email: newUser.email,
-      token: token,
+      username: newUser.username,
+      token: access_token,
     });
   } catch (error) {
     console.log(error);
@@ -94,34 +101,99 @@ const loginUser = async (req, res, next) => {
       return next(new HttpError("Invalid credentials.", 422));
     }
 
-    // 生成 JWT 令牌
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
+    // 生成 Access Token
+    const access_token = jwt.sign(
+      { userId: user.id, email: user.email, scope: ["blog", "admin"] }, // 添加 scope 字段
       process.env.JWT_SECRET,
-      { expiresIn: "30d" } // 改为30天
+      { expiresIn: "15m" } // Access Token 有效期为 15 分钟
     );
 
-    // 将令牌存储在 HTTPOnly cookie 中
-    res.cookie("token", token, {
+    // 生成 Refresh Token
+    const refresh_token = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "30d" } // Refresh Token 有效期为 30 天
+    );
+
+    // 将 Refresh Token 存储在 HTTPOnly Cookie 中
+    res.cookie("refresh_token", refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30天的毫秒数
     });
-    // console.log("Set-Cookie header:", res.getHeaders()["set-cookie"]);
 
-    // 返回用户信息
+    // 返回 Access Token 和用户信息
     res.status(200).json({
       userId: user.id,
       email: user.email,
       username: user.username,
-      token: token,
+      token: access_token,
     });
   } catch (error) {
+    console.log(error);
     // 处理捕获到的任何异常
     return next(
       new HttpError("Login failed. Please check your credentials.", 422)
     );
+  }
+};
+
+//api/users/refresh-token
+// 刷新 Token 的接口
+const refreshToken = async (req, res, next) => {
+  try {
+    // 从 Cookie 中获取 Refresh Token
+    const refresh_token = req.cookies.refresh_token;
+
+    if (!refresh_token) {
+      return next(new HttpError("No refresh token provided.", 401));
+    }
+
+    let userId;
+    try {
+      // 验证 Refresh Token
+      const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
+      userId = decoded.userId;
+    } catch (err) {
+      return next(new HttpError("Invalid refresh token.", 401));
+    }
+
+    // 查找用户信息
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new HttpError("User not found.", 401));
+    }
+
+    // 生成新的 Access Token
+    const access_token = jwt.sign(
+      { userId: user.id, email: user.email, scope: ["blog", "admin"] }, // 添加 scope 字段
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" } // Access Token 有效期为 15 分钟
+    );
+
+    // 可选：生成新的 Refresh Token 并更新 Cookie
+    const newRefresh_token = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "30d" } // Refresh Token 有效期为 30 天
+    );
+
+    res.cookie("refresh_token", newRefresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30天的毫秒数
+    });
+
+    // 返回新的 Access Token
+    res.status(200).json({
+      token: access_token,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to refresh token.", 500));
   }
 };
 
@@ -147,112 +219,6 @@ const getUser = async (req, res, next) => {
   }
 };
 
-//api/users/change-avatar
-const changeAvatar = async (req, res, next) => {
-  try {
-    if (!req.files.avatar) {
-      // 如果未提供头像文件，则返回错误
-      return next(new HttpError("Please choose an image.", 422));
-    }
-
-    // 从数据库中查找用户
-    const user = await User.findById(req.user.userId);
-
-    // 删除旧的头像文件（如果存在）
-    if (user.avatar) {
-      fs.unlink(path.join(__dirname, "..", "uploads", user.avatar), (err) => {
-        if (err) {
-          return next(new HttpError(err));
-        }
-      });
-    }
-    //TODO: 大文件处理？
-    // 检查头像文件大小
-    const { avatar } = req.files;
-    if (avatar.size > 500000) {
-      // 如果头像文件大于 500KB，则返回错误
-      return next(
-        new HttpError("Profile picture too big. Should be less than 500kb", 422)
-      );
-    }
-    let fileName; // 初始化文件名变量
-
-    fileName = avatar.name; // 获取头像文件名
-
-    let splittedFilename = fileName.split("."); // 分割文件名以获取扩展名
-
-    let newFilename =
-      splittedFilename[0] +
-      uuid() +
-      "." +
-      splittedFilename[splittedFilename.length - 1]; // 生成新的唯一文件名
-
-    avatar.mv(
-      path.join(__dirname, "..", "uploads", newFilename),
-      async (err) => {
-        // 移动文件到 uploads 目录
-        if (err) {
-          return next(new HttpError(err)); // 如果移动失败，返回错误
-        }
-
-        const updatedAvatar = await User.findByIdAndUpdate(
-          req.user.userId,
-          { avatar: newFilename },
-          { new: true }
-        ); // 更新用户头像
-
-        if (!updatedAvatar) {
-          return next(new HttpError("Avatar couldn't be changed.", 422)); // 如果更新失败，返回错误
-        }
-
-        res.status(200).json(updatedAvatar); // 成功返回更新后的用户信息
-      }
-    );
-  } catch (error) {
-    return next(new HttpError(error.message, error.statusCode));
-  }
-};
-
-//api/users/edit-user
-const editUser = async (req, res, next) => {
-  try {
-    const { username, email, password, newPassword, newPassword2 } = req.body;
-    //fill
-    if (!username || !email || !password || !newPassword || !newPassword2) {
-      return next(new HttpError("Please fill in all fields", 422));
-    }
-    const user = await User.findById(req.user.userId);
-    if (!user) {
-      return next(new HttpError("User not found", 403));
-    }
-    //make sure email doesn't exist
-    const emailExists = await User.findOne({ email });
-    if (emailExists && emailExists._id !== req.user.userId) {
-      return next(new HttpError("Email already exists", 422));
-    }
-    //compare password
-    const validateUserPassword = await bcrypt.compare(password, user.password);
-    if (!validateUserPassword) {
-      return next(new HttpError("Invalid password", 422));
-    }
-    if (newPassword !== newPassword2) {
-      return next(new HttpError("Passwords do not match", 422));
-    }
-    //hash new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    //update user
-    const updated = await User.findByIdAndUpdate(
-      req.user.userId,
-      { username, email, password: hashedPassword },
-      { new: true }
-    );
-    res.status(200).json(updated);
-  } catch (error) {
-    return next(new HttpError(error.message, error.statusCode));
-  }
-};
-
 //api/users/
 const getAuthors = async (req, res, next) => {
   try {
@@ -267,7 +233,7 @@ const getAuthors = async (req, res, next) => {
   }
 };
 
-//api/users/follow/:id
+//display/users/follow/:id
 const followUser = async (req, res, next) => {
   try {
     const userToFollow = await User.findById(req.params.id);
@@ -301,7 +267,7 @@ const followUser = async (req, res, next) => {
   }
 };
 
-//api/users/unfollow/:id
+//display/users/unfollow/:id
 const unfollowUser = async (req, res, next) => {
   try {
     const userToUnfollow = await User.findById(req.params.id);
@@ -331,7 +297,7 @@ const unfollowUser = async (req, res, next) => {
   }
 };
 
-//api/users/:id/following
+//display/users/:id/following
 const getFollowedUsers = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
@@ -348,7 +314,7 @@ const getFollowedUsers = async (req, res, next) => {
   }
 };
 
-//api/users/:id/followers
+//display/users/:id/followers
 const getFollowers = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
@@ -497,9 +463,8 @@ const getUserStats = async (req, res, next) => {
 module.exports = {
   registerUser,
   loginUser,
+  refreshToken,
   getUser,
-  changeAvatar,
-  editUser,
   getAuthors,
   followUser,
   unfollowUser,

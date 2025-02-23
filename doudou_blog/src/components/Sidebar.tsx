@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
 import { useEffect, useState } from "react";
 import { throttle } from "lodash";
+import { useGlobal } from "../contexts/GlobalContexts";
 import {
   BiHome,
   BiUser,
@@ -16,12 +15,9 @@ import {
   BiLogOut,
   BiLogIn,
 } from "react-icons/bi";
-import { toggleTheme } from "../store/themeSlice";
 
 const Sidebar = () => {
-  const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user.user);
-  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  const { user, isDarkMode, toggleTheme } = useGlobal();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isOpen, setIsOpen] = useState(!isMobile);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -36,10 +32,6 @@ const Sidebar = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [handleResize]);
-
-  const handleThemeToggle = () => {
-    dispatch(toggleTheme());
-  };
 
   const NavigationLinks = () => (
     <>
@@ -112,7 +104,7 @@ const Sidebar = () => {
           {isMoreOpen && (
             <div className="absolute bottom-full left-0 w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-2 mb-1">
               <button
-                onClick={handleThemeToggle}
+                onClick={toggleTheme}
                 className="flex items-center w-full text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 p-2 rounded-lg hover:bg-orange-50 dark:hover:bg-gray-700"
               >
                 {isDarkMode ? (

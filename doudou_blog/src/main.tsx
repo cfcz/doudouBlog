@@ -9,20 +9,16 @@ import PostDetail from "./pages/PostDetail.tsx";
 import Register from "./pages/Register.tsx";
 import Login from "./pages/Login.tsx";
 import UserProfile from "./pages/UserProfile.tsx";
-import CategoryPost from "./pages/CategoryPost.tsx";
-import AuthorPosts from "./pages/AuthorPosts.tsx";
 import Logout from "./pages/Logout.tsx";
-
-import store from "./store/index.ts";
-import { Provider } from "react-redux";
+import { GlobalProvider } from "./contexts/GlobalContexts.tsx"; // 引入自定义的上下文提供者
 
 const BrowserRouter = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Provider store={store}>
+      <GlobalProvider>
         <Layout />
-      </Provider>
+      </GlobalProvider>
     ),
     errorElement: <ErrorPage />,
     children: [
@@ -31,8 +27,6 @@ const BrowserRouter = createBrowserRouter([
       { path: "register", element: <Register /> }, //注册-简略版本
       { path: "login", element: <Login /> }, //登录-简略版本
       { path: "profile/:userId", element: <UserProfile /> }, // 修改为用户详情页路由
-      { path: "posts/categories/:category", element: <CategoryPost /> }, //分类的文章
-      { path: "posts/users/:id", element: <AuthorPosts /> }, //个人的文章展示不确定现在要不要
       { path: "logout", element: <Logout /> },
     ],
   },

@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
+import { useGlobal } from "../contexts/GlobalContexts";
 import { Post, Layout } from "../types";
 import axiosInstance from "../utils/axiosSetup";
 import Comments from "../components/Comments";
 
 const PostDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const user = useSelector(selectUser);
+  const { user } = useGlobal();
   const mounted = useRef(true);
   const [post, setPost] = useState<Post | null>(null);
   const [layout, setLayout] = useState<Layout | null>(null);
@@ -30,7 +29,7 @@ const PostDetails = () => {
 
     try {
       const response = await axiosInstance.get(
-        `/users/${user.userId}/following`,
+        `/display/users/${user.userId}/following`,
         {
           headers: { Authorization: `Bearer ${user.token}` },
         }
@@ -60,7 +59,7 @@ const PostDetails = () => {
     try {
       const endpoint = isFollowing ? "unfollow" : "follow";
       await axiosInstance.post(
-        `/users/${endpoint}/${post.creator._id}`,
+        `/display/users/${endpoint}/${post.creator._id}`,
         {},
         {
           headers: { Authorization: `Bearer ${user.token}` },
@@ -82,10 +81,10 @@ const PostDetails = () => {
         }
 
         const [postRes, layoutRes] = await Promise.all([
-          axiosInstance.get<Post>(`/posts/${id}`, {
+          axiosInstance.get<Post>(`/api/posts/${id}`, {
             headers: { Authorization: `Bearer ${user?.token}` },
           }),
-          axiosInstance.get<Layout>(`/layout`, {
+          axiosInstance.get<Layout>(`/display/layout`, {
             headers: { Authorization: `Bearer ${user?.token}` },
           }),
         ]);

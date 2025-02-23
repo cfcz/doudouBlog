@@ -1,11 +1,10 @@
 import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
 import Sidebar from "./Sidebar";
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { useGlobal } from "../contexts/GlobalContexts";
 
 const Layout = () => {
-  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  const { isDarkMode } = useGlobal();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);

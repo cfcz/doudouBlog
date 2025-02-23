@@ -6,9 +6,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 // 添加认证中间件以保护路由
 router.use(authMiddleware);
 
-// 获取布局设置
-router.get("/", getLayout);
-
 // 保存布局设置
 router.post("/", saveLayout);
 

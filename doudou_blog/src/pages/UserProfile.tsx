@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
+import { useGlobal } from "../contexts/GlobalContexts";
 import axiosInstance from "../utils/axiosSetup";
 import PostItem from "../components/PostItem";
 import { Post } from "../types";
@@ -20,7 +19,7 @@ interface ProfileInfo {
 const UserProfile = () => {
   const { userId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams({ tab: "posts" });
-  const currentUser = useSelector(selectUser);
+  const { user: currentUser } = useGlobal();
   const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,28 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
+import { useGlobal } from "../contexts/GlobalContexts";
 import { Author } from "../types";
+import axiosInstance from "../utils/axiosSetup";
 
 const PostAuthor = ({ authorID }: { authorID: string }) => {
   const [author, setAuthor] = useState<Author | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const user = useSelector(selectUser);
+  const { user } = useGlobal();
 
   useEffect(() => {
     const fetchAuthor = async () => {
       try {
         if (!user?.token) return;
 
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/users/${authorID}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
+        const response = await axiosInstance.get(`/api/users/${authorID}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
         setAuthor(response.data);
       } catch (error) {
         console.error("Failed to fetch author:", error);
@@ -50,7 +46,7 @@ const PostAuthor = ({ authorID }: { authorID: string }) => {
 
   return (
     <Link
-      to={`/posts/users/${authorID}`}
+      to={`/profile/${authorID}`}
       className="flex items-center hover:opacity-80 transition-opacity duration-300"
     >
       <div className="w-10 h-10 rounded-full mr-4 bg-orange-100 flex items-center justify-center text-orange-500 font-bold border-2 border-orange-200">

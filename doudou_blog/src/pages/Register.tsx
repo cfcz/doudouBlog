@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { useGlobal } from "../contexts/GlobalContexts";
 
 const Register = () => {
   const [userData, setUserData] = useState({
@@ -13,7 +12,7 @@ const Register = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { setUser } = useGlobal();
 
   const changeInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,7 +38,7 @@ const Register = () => {
         setError("could not register user");
         return;
       }
-      dispatch(setUser(newUser));
+      setUser(newUser);
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

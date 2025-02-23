@@ -1,8 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { useGlobal } from "../contexts/GlobalContexts";
 
 const Login = () => {
   const [userData, setUserData] = useState({
@@ -11,7 +10,7 @@ const Login = () => {
   });
   const [error, setError] = useState<string | null>("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { setUser } = useGlobal();
 
   const changeInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,19 +23,12 @@ const Login = () => {
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/users/login`,
-        userData,
-        { withCredentials: true }
-      );
+      const response = await axios.post(`/api/users/login`, userData, {
+        withCredentials: true,
+      });
 
       const { token, ...userInfo } = response.data;
-
-      // 使用 localStorage 替代 sessionStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userInfo));
-
-      dispatch(setUser({ ...userInfo, token }));
+      setUser({ ...userInfo, token });
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
