@@ -1,17 +1,15 @@
 import { Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
-import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectUser, clearUser } from "../store/userSlice";
+import { useGlobal } from "../context/GlobalContexts";
 import { BiLogOut } from "react-icons/bi";
 
 const Header = () => {
-  const user = useSelector(selectUser);
-  const dispatch = useDispatch();
+  const { user, setUser } = useGlobal();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(clearUser());
+    setUser(null);
     navigate("/login");
   };
 

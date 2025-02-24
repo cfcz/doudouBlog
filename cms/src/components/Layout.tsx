@@ -1,42 +1,20 @@
+import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
+import { useGlobal } from "../context/GlobalContexts";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
 const Layout = () => {
+  const { user } = useGlobal();
   const navigate = useNavigate();
-  const user = useSelector(selectUser);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
-      try {
-        const tokenData = JSON.parse(atob(token.split(".")[1]));
-        if (tokenData.exp * 1000 < Date.now()) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          navigate("/login");
-        }
-      } catch (error) {
-        console.error("Token validation error:", error);
-      }
-    };
-
-    checkAuth();
-  }, []); // 只在组件挂载时检查一次
-
-  // 如果用户未登录，返回 null 而不是立即重定向
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <div className="flex flex-col h-screen">

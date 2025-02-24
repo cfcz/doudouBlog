@@ -17,9 +17,7 @@ import {
 } from "react-icons/bi";
 import { uploadMedia } from "../services/upload";
 import axios from "axios";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
-// import "../styles/editor.css";
+import { useGlobal } from "../context/GlobalContexts";
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
@@ -145,7 +143,21 @@ const PublishPost = () => {
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState("");
-  const user = useSelector(selectUser);
+  const { user } = useGlobal();
+  const [selectedTheme, setSelectedTheme] = useState<"default" | "detailed">(
+    "default"
+  );
+
+  const themePreviewClasses = {
+    default: {
+      container: "bg-default-gradient p-4 rounded-lg",
+      text: "font-default text-default-text",
+    },
+    detailed: {
+      container: "bg-detailed-gradient p-4 rounded-lg",
+      text: "font-detailed text-detailed-text",
+    },
+  };
 
   const editor = useEditor({
     extensions: [StarterKit, Image, Link, Underline],
@@ -190,13 +202,13 @@ const PublishPost = () => {
         title,
         content: editor.getHTML(),
         tags,
+        theme: selectedTheme,
       };
 
       console.log("Sending post data:", postData);
 
       // 使用完整的URL
-      const baseUrl = import.meta.env.VITE_BASE_URL;
-      const response = await axios.post(`${baseUrl}/posts`, postData, {
+      const response = await axios.post(`/admin/posts`, postData, {
         headers: {
           Authorization: `Bearer ${user.token}`,
           "Content-Type": "application/json",
@@ -246,6 +258,36 @@ const PublishPost = () => {
       </div>
 
       <div className="space-y-8">
+        <div className="bg-white p-6 rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">选择主题样式</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {(["default", "detailed"] as const).map((theme) => (
+              <div
+                key={theme}
+                onClick={() => setSelectedTheme(theme)}
+                className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                  selectedTheme === theme
+                    ? "border-orange-500 shadow-lg"
+                    : "border-transparent"
+                }`}
+              >
+                <div className={themePreviewClasses[theme].container}>
+                  <h3
+                    className={`${themePreviewClasses[theme].text} font-bold mb-2`}
+                  >
+                    {theme === "default" ? "默认主题" : "精致主题"}
+                  </h3>
+                  <p className={themePreviewClasses[theme].text}>
+                    {theme === "default"
+                      ? "简洁大方的阅读体验"
+                      : "精致优雅的视觉呈现"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 标题输入 */}
         <div>
           <input
@@ -294,12 +336,14 @@ const PublishPost = () => {
         </div>
 
         {/* TipTap 编辑器 */}
-        <div className="bg-white rounded-lg border">
+        <div
+          className={`bg-white rounded-lg border ${themePreviewClasses[selectedTheme].text}`}
+        >
           <MenuBar editor={editor} />
           <div className="p-4">
             <EditorContent
               editor={editor}
-              className="min-h-[500px] prose max-w-none"
+              className={`min-h-[500px] prose max-w-none prose-${selectedTheme}`}
             />
           </div>
         </div>

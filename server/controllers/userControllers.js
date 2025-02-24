@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const path = require("path");
 const { v4: uuid } = require("uuid");
 const fs = require("fs");
+const domainConfig = require("../config/domains");
 
 //api/users/register
 const registerUser = async (req, res, next) => {
@@ -105,7 +106,7 @@ const loginUser = async (req, res, next) => {
     const access_token = jwt.sign(
       { userId: user.id, email: user.email, scope: ["blog", "admin"] }, // 添加 scope 字段
       process.env.JWT_SECRET,
-      { expiresIn: "15m" } // Access Token 有效期为 15 分钟
+      { expiresIn: "10m" } // Access Token 有效期为 15 分钟
     );
 
     // 生成 Refresh Token
@@ -120,6 +121,7 @@ const loginUser = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
+      domain: domainConfig.domain,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30天的毫秒数
     });
 
@@ -184,6 +186,7 @@ const refreshToken = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
+      domain: domainConfig.domain,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30天的毫秒数
     });
 
@@ -193,7 +196,38 @@ const refreshToken = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    return next(new HttpError("Failed to refresh token.", 500));
+    return next(new HttpError("Failed to refresh token." + error, 500));
+  }
+};
+
+const verifyToken = async (req, res) => {
+  const token = req.cookies.refresh_token;
+
+  if (!token) return res.status(401).json({ message: "未登录" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return next(new HttpError("User not found", 401));
+    }
+
+    // 生成新的 access token
+    const access_token = jwt.sign(
+      { userId: user.id, email: user.email, scope: ["blog", "admin"] },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.status(200).json({
+      userId: user.id,
+      email: user.email,
+      username: user.username,
+      token: access_token,
+    });
+  } catch (error) {
+    res.status(401).json({ message: "无效的 Token" });
   }
 };
 
@@ -464,6 +498,7 @@ module.exports = {
   registerUser,
   loginUser,
   refreshToken,
+  verifyToken,
   getUser,
   getAuthors,
   followUser,

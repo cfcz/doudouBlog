@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectUser } from "../store/userSlice";
+import { useGlobal } from "../context/GlobalContexts";
 import { Layout } from "../types";
 import {
   DragDropContext,
@@ -11,7 +10,6 @@ import {
 } from "@hello-pangea/dnd";
 import theme1 from "../assets/theme1-0.jpg";
 import theme2 from "../assets/theme2-1.jpg";
-import theme3 from "../assets/theme2-2.jpg";
 import axios from "axios";
 
 interface ThemeOption {
@@ -29,7 +27,7 @@ interface LayoutComponent {
 }
 
 const ThemeLayout = () => {
-  const user = useSelector(selectUser);
+  const { user } = useGlobal();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +55,6 @@ const ThemeLayout = () => {
       name: "现代主题",
       image: theme2,
       description: "充满活力的现代设计",
-    },
-    {
-      id: "theme3",
-      name: "暗色主题",
-      image: theme3,
-      description: "护眼舒适的暗色模式",
     },
   ];
 
@@ -144,14 +136,11 @@ const ThemeLayout = () => {
     const loadLayout = async () => {
       try {
         setLoading(true);
-        const response = await axios.get<Layout>(
-          `${import.meta.env.VITE_BASE_URL}/layout`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
+        const response = await axios.get<Layout>(`/display/layout`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
 
         const { theme, sidebarPosition, components } = response.data;
         setSelectedTheme(theme);
@@ -183,7 +172,7 @@ const ThemeLayout = () => {
     try {
       setError(null);
       await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/layout`,
+        `$/admin/layout`,
         {
           theme: selectedTheme,
           sidebarPosition,

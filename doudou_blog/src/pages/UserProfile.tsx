@@ -38,7 +38,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axiosInstance.get(`/users/${userId}`, {
+        const response = await axiosInstance.get(`/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${currentUser?.token}` },
         });
         setProfileInfo(response.data);
@@ -58,13 +58,13 @@ const UserProfile = () => {
         let endpoint = "";
         switch (activeTab) {
           case "favorites":
-            endpoint = `/posts/favorites/${userId}`;
+            endpoint = `/display/posts/favorites/${userId}`;
             break;
           case "likes":
-            endpoint = `/posts/likes/${userId}`;
+            endpoint = `/display/posts/likes/${userId}`;
             break;
           default:
-            endpoint = `/posts/users/${userId}`;
+            endpoint = `/display/posts/users/${userId}`;
         }
 
         const response = await axiosInstance.get(endpoint, {

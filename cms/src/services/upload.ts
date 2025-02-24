@@ -1,5 +1,4 @@
 import axios from "axios";
-import { store } from "../store/store";
 
 interface UploadResponse {
   url: string;
@@ -12,8 +11,8 @@ export const uploadMedia = async (file: File): Promise<UploadResponse> => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const state = store.getState();
-    const token = state.user.user?.token;
+    // 从 localStorage 获取 token，而不是从 Redux store
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("未登录");
@@ -29,7 +28,7 @@ export const uploadMedia = async (file: File): Promise<UploadResponse> => {
     console.log("FormData entries:", Array.from(formData.entries()));
 
     const response = await axios.post<UploadResponse>(
-      `${import.meta.env.VITE_BASE_URL}/upload`,
+      `/admin/upload`,
       formData,
       {
         headers: {

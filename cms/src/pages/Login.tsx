@@ -1,8 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { useGlobal } from "../context/GlobalContexts";
 
 const Login = () => {
   const [userData, setUserData] = useState({
@@ -11,7 +10,7 @@ const Login = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { setUser } = useGlobal();
 
   const changeInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData((prev) => ({
@@ -25,20 +24,12 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/users/login`,
-        userData,
-        { withCredentials: true }
-      );
+      const response = await axios.post(`/api/users/login`, userData, {
+        withCredentials: true,
+      });
 
       const { token, ...userInfo } = response.data;
-
-      // 先存储数据
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userInfo));
-
-      // 然后更新 Redux store
-      dispatch(setUser({ ...userInfo, token }));
+      setUser({ ...userInfo, token });
 
       // 最后再导航
       setTimeout(() => navigate("/"), 100);

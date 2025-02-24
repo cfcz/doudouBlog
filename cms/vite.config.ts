@@ -9,14 +9,12 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:5000", // 后端服务地址
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
       },
 
       // 将所有以 /admin 开头的请求也转发到后端服务
       "/admin": {
         target: "http://localhost:5000", // 后端服务地址
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/admin/, ""),
       },
     },
   },

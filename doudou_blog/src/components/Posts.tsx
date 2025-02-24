@@ -37,26 +37,47 @@ const Posts = () => {
     fetchPosts();
   }, [user?.token]);
 
-  if (loading) return <div className="text-center p-10">Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+
   if (error)
-    return <div className="text-center p-10 text-red-500">{error}</div>;
+    return (
+      <div className="text-center p-10">
+        <div className="inline-block p-4 bg-red-50 rounded-lg">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    );
 
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 p-10">
+    <section className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {posts.length > 0 ? (
-        posts.map((post) => (
-          <PostItem
+        posts.map((post, index) => (
+          <div
             key={post._id}
-            postID={post._id}
-            title={post.title}
-            content={post.content}
-            tags={post.tags}
-            authorID={post.creator._id}
-            mediaFiles={post.mediaFiles}
-          />
+            className="transform hover:-translate-y-1 transition-transform duration-200"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <PostItem
+              postID={post._id}
+              title={post.title}
+              content={post.content}
+              tags={post.tags}
+              authorID={post.creator._id}
+              mediaFiles={post.mediaFiles}
+            />
+          </div>
         ))
       ) : (
-        <h2 className="text-center col-span-full">No posts found</h2>
+        <div className="col-span-full flex justify-center items-center min-h-[200px]">
+          <h2 className="text-gray-500 text-lg">暂无文章</h2>
+        </div>
       )}
     </section>
   );

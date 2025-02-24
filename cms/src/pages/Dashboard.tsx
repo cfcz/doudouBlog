@@ -1,14 +1,13 @@
 import { useState } from "react";
+// import { useGlobal } from "../context/GlobalContexts";
 
 const Dashboard = () => {
   const [dateRange, setDateRange] = useState<"7days" | "30days">("7days");
+  // const { user } = useGlobal();
 
   return (
-    // 修改最外层 grid 的响应式类
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* 左侧主要内容区域 - 在大屏幕时占据2/3宽度 */}
       <div className="lg:col-span-2 space-y-6">
-        {/* 账号信息板块 */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4">账号信息</h2>
           <div className="flex space-x-6">
@@ -46,7 +45,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 创作板块 */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4">创作</h2>
           <div className="grid grid-cols-3 gap-4">
@@ -65,7 +63,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 数据面板 */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">数据面板</h2>
@@ -118,9 +115,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 右侧边栏 - 在小屏幕时隐藏，大屏幕时显示 */}
       <div className="hidden lg:block space-y-6">
-        {/* 重要通知 */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4">重要通知</h2>
           <div className="space-y-4">
@@ -135,7 +130,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 热门主题 */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4">热门主题</h2>
           <div className="space-y-3">

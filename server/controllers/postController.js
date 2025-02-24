@@ -4,7 +4,7 @@ const { deleteUnusedFile } = require("../utils/fileManager");
 
 const createPost = async (req, res, next) => {
   try {
-    const { title, content, tags } = req.body;
+    const { title, content, tags, theme } = req.body; // 添加 theme 参数
 
     // 验证用户
     if (!req.user || !req.user.id) {
@@ -53,6 +53,7 @@ const createPost = async (req, res, next) => {
       title,
       content,
       tags,
+      theme: theme || "default", // 默认主题
       creator: req.user.id,
       mediaFiles,
     });
@@ -102,6 +103,12 @@ const getPost = async (req, res, next) => {
       return res.status(404).json({ message: "文章不存在" });
     }
 
+    // 返回时包含主题信息
+    const response = {
+      ...post.toJSON(),
+      theme: post.theme || "default", // 确保有默认主题
+    };
+
     // 如果用户已登录，检查用户是否已点赞和收藏
     if (req.user) {
       const user = await User.findById(req.user._id);
@@ -110,7 +117,7 @@ const getPost = async (req, res, next) => {
       post.isFavorited = user.favoritePosts.includes(post._id);
     }
 
-    res.json(post);
+    res.json(response);
   } catch (error) {
     next(error);
   }

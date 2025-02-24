@@ -22,6 +22,7 @@ export interface Post {
   isFavorited?: boolean; // 当前用户是否收藏
   createdAt: string;
   updatedAt: string;
+  theme: "default" | "detailed";
 }
 
 export interface Layout {

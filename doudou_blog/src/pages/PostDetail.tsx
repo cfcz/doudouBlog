@@ -23,6 +23,27 @@ const PostDetails = () => {
     like: false,
     favorite: false,
   });
+  const [theme, setTheme] = useState<"default" | "detailed">("default");
+
+  // 主题样式类映射
+  const themeClasses = {
+    container: {
+      default: "bg-default-gradient",
+      detailed: "bg-detailed-gradient",
+    },
+    card: {
+      default: "bg-white shadow-default",
+      detailed: "bg-white shadow-detailed",
+    },
+    title: {
+      default: "font-default text-default-text",
+      detailed: "font-detailed text-detailed-text",
+    },
+    tag: {
+      default: "bg-default-primary text-default-text",
+      detailed: "bg-detailed-primary text-detailed-text",
+    },
+  };
 
   const checkFollowStatus = useCallback(async () => {
     if (!user?.token || !post?.creator?._id) return;
@@ -92,6 +113,8 @@ const PostDetails = () => {
         if (mounted.current) {
           setPost(postRes.data);
           setLayout(layoutRes.data);
+          // 设置从后端获取的主题
+          setTheme(postRes.data.theme || "default");
           setError(null);
         }
       } catch (err) {
@@ -168,16 +191,18 @@ const PostDetails = () => {
     }
   };
 
+  // 修改渲染组件函数中的样式
   const renderComponent = (componentId: string) => {
     if (!post) return null;
 
     switch (componentId) {
       case "content":
         return (
-          <div className="bg-white rounded-lg shadow-md p-8">
-            {/* 将标题移动到内容区域 */}
+          <div className={`rounded-lg p-8 ${themeClasses.card[theme]}`}>
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1
+                className={`text-4xl font-bold mb-4 ${themeClasses.title[theme]}`}
+              >
                 {post.title}
               </h1>
               <div className="flex items-center justify-between">
@@ -192,7 +217,6 @@ const PostDetails = () => {
                     {post.creator.username}
                   </span>
                 </div>
-                {/* 新增点赞和收藏按钮 */}
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={handleLike}
@@ -243,7 +267,7 @@ const PostDetails = () => {
                 </div>
               </div>
             </div>
-            <div className="prose prose-orange lg:prose-lg max-w-none">
+            <div className={`prose prose-${theme} lg:prose-lg max-w-none`}>
               <div dangerouslySetInnerHTML={{ __html: post?.content || "" }} />
             </div>
           </div>
@@ -255,7 +279,7 @@ const PostDetails = () => {
         const isOwnProfile = user?.userId === _id;
 
         return (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className={`rounded-lg p-6 ${themeClasses.card[theme]}`}>
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="mr-2">👤</span>
               关于作者
@@ -291,8 +315,10 @@ const PostDetails = () => {
 
       case "tags":
         return (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <div className={`rounded-lg p-6 ${themeClasses.card[theme]}`}>
+            <h3
+              className={`text-lg font-semibold mb-4 ${themeClasses.title[theme]}`}
+            >
               <span className="mr-2">🏷️</span>
               文章标签
             </h3>
@@ -300,11 +326,11 @@ const PostDetails = () => {
               {post.tags?.map((tag) => (
                 <span
                   key={tag}
-                  className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full text-sm border border-orange-100 hover:bg-orange-100 transition-colors"
+                  className={`px-4 py-2 rounded-full text-sm ${themeClasses.tag[theme]}`}
                 >
                   {tag}
                 </span>
-              )) || <span className="text-gray-500">暂无标签</span>}
+              ))}
             </div>
           </div>
         );
@@ -318,7 +344,7 @@ const PostDetails = () => {
 
       case "related":
         return (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className={`rounded-lg p-6 ${themeClasses.card[theme]}`}>
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="mr-2">📚</span>
               相关文章
@@ -355,8 +381,9 @@ const PostDetails = () => {
     );
   }
 
+  // 修改最外层容器的样式
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`min-h-screen py-8 ${themeClasses.container[theme]}`}>
       <div className="max-w-7xl mx-auto px-4">
         <div
           className={`grid grid-cols-1 lg:grid-cols-7 gap-8 ${

@@ -1,7 +1,7 @@
-import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGlobal } from "../contexts/GlobalContexts";
+import axiosInstance from "../utils/axiosSetup";
 
 const Login = () => {
   const [userData, setUserData] = useState({
@@ -23,7 +23,7 @@ const Login = () => {
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`/api/users/login`, userData, {
+      const response = await axiosInstance.post(`/api/users/login`, userData, {
         withCredentials: true,
       });
 
@@ -31,11 +31,7 @@ const Login = () => {
       setUser({ ...userInfo, token });
       navigate("/");
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        setError(error.response.data.message);
-      } else {
-        setError(String(error));
-      }
+      setError(String(error));
     }
   };
 

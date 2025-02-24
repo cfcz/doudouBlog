@@ -33,7 +33,7 @@ const postSchema = new Schema(
     likes: [
       {
         user: { type: Schema.Types.ObjectId, ref: "User" },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
       },
     ],
     likesCount: {
@@ -43,7 +43,7 @@ const postSchema = new Schema(
     favorites: [
       {
         user: { type: Schema.Types.ObjectId, ref: "User" },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
       },
     ],
     favoritesCount: {
@@ -53,9 +53,14 @@ const postSchema = new Schema(
     comments: [
       {
         user: { type: Schema.Types.ObjectId, ref: "User" },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
       },
     ],
+    theme: {
+      type: String,
+      enum: ["default", "detailed"],
+      default: "default",
+    },
   },
   {
     timestamps: true,
