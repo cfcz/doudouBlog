@@ -64,7 +64,7 @@ const UserProfile = () => {
             endpoint = `/display/posts/likes/${userId}`;
             break;
           default:
-            endpoint = `/display/posts/users/${userId}`;
+            endpoint = `/api/posts/users/${userId}`;
         }
 
         const response = await axiosInstance.get(endpoint, {

@@ -32,8 +32,8 @@ const PostDetails = () => {
       detailed: "bg-detailed-gradient",
     },
     card: {
-      default: "bg-white shadow-default",
-      detailed: "bg-white shadow-detailed",
+      default: "bg-transparent shadow-default",
+      detailed: "bg-transparent shadow-detailed",
     },
     title: {
       default: "font-default text-default-text",

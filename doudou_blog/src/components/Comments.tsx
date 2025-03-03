@@ -327,7 +327,7 @@ const Comments: React.FC<CommentProps> = ({ postId, token, userId }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-transparent rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
         <span className="mr-2">💬</span>
         评论区

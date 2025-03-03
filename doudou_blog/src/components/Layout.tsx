@@ -25,7 +25,7 @@ const Layout = () => {
         className="flex-1 relative dark:bg-gray-900 dark:text-gray-100 
         animate-fade-in overflow-hidden"
       >
-        <div className="absolute inset-0 overflow-y-auto px-6 py-6">
+        <div className="absolute inset-0 overflow-y-auto ">
           <Outlet />
         </div>
       </main>

@@ -106,7 +106,7 @@ const loginUser = async (req, res, next) => {
     const access_token = jwt.sign(
       { userId: user.id, email: user.email, scope: ["blog", "admin"] }, // 添加 scope 字段
       process.env.JWT_SECRET,
-      { expiresIn: "10m" } // Access Token 有效期为 15 分钟
+      { expiresIn: "15m" } // Access Token 有效期为 15 分钟
     );
 
     // 生成 Refresh Token

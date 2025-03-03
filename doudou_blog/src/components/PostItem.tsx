@@ -49,6 +49,7 @@ const PostItem: React.FC<PostItemProps> = ({
           alt={title}
           onError={handleImageError}
           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+          loading="eager"
         />
         {/* 标签展示 */}
         <div className="absolute top-2 right-2 flex gap-2">

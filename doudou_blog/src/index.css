@@ -6,3 +6,9 @@
 .dark {
   @apply bg-gray-900 text-gray-100;
 }
+
+/* input.css 或 styles.css */
+html,
+body {
+  @apply overscroll-none; /* 使用 Tailwind 的 apply 指令 */
+}

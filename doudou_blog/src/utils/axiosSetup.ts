@@ -1,4 +1,5 @@
 import axios from "axios";
+import { AxiosRequestConfig } from "axios";
 
 // 创建一个弱引用对象来存储 setUser 函数
 const contextRef = {
@@ -27,7 +28,8 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     // 检查 Token 是否即将过期并尝试刷新
-    await checkTokenExpiration();
+    await checkTokenExpiration(config);
+    // if (newToken) config.headers.Authorization = `Bearer ${newToken}`;
     return config;
   },
   (error) => {
@@ -59,7 +61,7 @@ axiosInstance.interceptors.response.use(
 );
 
 // Token 续期逻辑
-const checkTokenExpiration = async () => {
+const checkTokenExpiration = async (config: AxiosRequestConfig) => {
   const user = localStorage.getItem("user");
   if (!user) return;
   const token = JSON.parse(user).token;
@@ -77,21 +79,17 @@ const checkTokenExpiration = async () => {
 
       // 更新 Token 到本地存储和 Axios 默认配置
       localStorage.setItem("token", newToken);
-      axiosInstance.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${newToken}`;
-
-      console.log("Token refreshed successfully!");
+      if (config.headers) config.headers.Authorization = `Bearer ${newToken}`;
     }
   } catch (error) {
     console.error("Failed to refresh token:", error);
 
     // 如果续期失败，清除 Token 并登出用户
-    // localStorage.removeItem("user");
-    // if (contextRef.setUser) {
-    //   contextRef.setUser(null);
-    // }
-    // window.location.href = "/login";
+    localStorage.removeItem("user");
+    if (contextRef.setUser) {
+      contextRef.setUser(null);
+    }
+    window.location.href = "/login";
   }
 };
 

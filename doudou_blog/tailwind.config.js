@@ -23,8 +23,9 @@ export default {
       // 背景渐变
       backgroundImage: {
         "default-gradient":
-          "linear-gradient(to bottom right, #FCF0DE, #FEC5C4)", // 现有主题渐变
-        "detailed-gradient": "linear-gradient(to right, #FFBBC0, #FFDDCA)", // 新主题渐变
+          "linear-gradient(to bottom right,rgba(252, 240, 222, 0.3),rgba(254, 197, 196, 0.3))", // 现有主题渐变
+        "detailed-gradient":
+          "linear-gradient(to right,rgba(255, 187, 191, 0.3),rgba(255, 221, 202, 0.3))", // 新主题渐变
         "default-pattern": "url('/patterns/default-pattern.svg')",
         "detailed-pattern": "url('/patterns/detailed-pattern.svg')",
         "default-sidebar":
